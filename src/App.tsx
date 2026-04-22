@@ -28,6 +28,7 @@ import {
   Volume2,
   VolumeX,
   Music,
+  Plus,
   Sprout,
   Leaf
 } from 'lucide-react';
@@ -445,6 +446,28 @@ export default function App() {
     setSettingsSubject(updatedSubject);
   };
 
+  const addNewQuestion = () => {
+    if (!settingsSubject) return;
+
+    const newQuestion: Question = {
+      id: `manual-${Date.now()}`,
+      text: 'Câu hỏi mới của bạn?',
+      options: ['Lựa chọn A', 'Lựa chọn B', 'Lựa chọn C', 'Lựa chọn D'],
+      correctAnswer: 0
+    };
+
+    const updatedQuestions = [...settingsSubject.questions, newQuestion];
+    const updatedSubject = { ...settingsSubject, questions: updatedQuestions };
+
+    setGameState(prev => ({
+      ...prev,
+      selectedSubject: updatedSubject
+    }));
+
+    setSettingsSubject(updatedSubject);
+    setEditingQuestionId(newQuestion.id);
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-800 overflow-x-hidden">
       {/* Header */}
@@ -556,99 +579,112 @@ export default function App() {
                   </div>
 
                   {/* Question List & Editor */}
-                  {settingsSubject && settingsSubject.questions.length > 0 && (
+                  {settingsSubject && (
                     <div className="bg-white rounded-[40px] p-10 shadow-xl border border-slate-100 space-y-8">
                       <div className="flex items-center justify-between">
                         <h3 className="text-xl font-black flex items-center gap-2">
                           <FileText className="text-blue-600" />
                           Danh sách câu hỏi ({settingsSubject.questions.length})
                         </h3>
+                        <button 
+                          onClick={addNewQuestion}
+                          className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-emerald-100 cursor-pointer"
+                        >
+                          <Plus size={18} />
+                          Thêm câu hỏi
+                        </button>
                       </div>
                       
-                      <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                        {settingsSubject.questions.map((q, qIdx) => (
-                          <div key={q.id} className="p-6 rounded-3xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all">
-                            {editingQuestionId === q.id ? (
-                              <div className="space-y-4">
-                                <div>
-                                  <label className="block text-xs font-black text-slate-400 uppercase mb-2">Câu hỏi {qIdx + 1}</label>
-                                  <textarea 
-                                    className="w-full p-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none font-bold text-slate-700"
-                                    defaultValue={q.text}
-                                    rows={2}
-                                    onBlur={(e) => updateQuestion(q.id, { text: e.target.value })}
-                                  />
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  {q.options.map((opt, oIdx) => (
-                                    <div key={oIdx} className="relative">
-                                      <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Lựa chọn {String.fromCharCode(65 + oIdx)}</label>
-                                      <div className="flex items-center gap-2">
-                                        <input 
-                                          type="radio"
-                                          name={`correct-${q.id}`}
-                                          checked={q.correctAnswer === oIdx}
-                                          onChange={() => updateQuestion(q.id, { correctAnswer: oIdx })}
-                                          className="w-4 h-4 text-blue-600"
-                                        />
-                                        <input 
-                                          className="flex-1 p-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none text-sm font-bold"
-                                          defaultValue={opt}
-                                          onBlur={(e) => {
-                                            const newOptions = [...q.options];
-                                            newOptions[oIdx] = e.target.value;
-                                            updateQuestion(q.id, { options: newOptions });
-                                          }}
-                                        />
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                                <div className="flex justify-end gap-2 pt-2">
-                                  <button 
-                                    onClick={() => setEditingQuestionId(null)}
-                                    className="px-4 py-2 bg-slate-200 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-300 transition-colors"
-                                  >
-                                    Xong
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-xs font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Câu {qIdx + 1}</span>
-                                    <h4 className="font-bold text-slate-800">{q.text}</h4>
+                      {settingsSubject.questions.length > 0 ? (
+                        <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                          {settingsSubject.questions.map((q, qIdx) => (
+                            <div key={q.id} className="p-6 rounded-3xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all">
+                              {editingQuestionId === q.id ? (
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase mb-2">Câu hỏi {qIdx + 1}</label>
+                                    <textarea 
+                                      className="w-full p-4 rounded-2xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none font-bold text-slate-700"
+                                      defaultValue={q.text}
+                                      rows={2}
+                                      onBlur={(e) => updateQuestion(q.id, { text: e.target.value })}
+                                    />
                                   </div>
-                                  <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {q.options.map((opt, oIdx) => (
-                                      <div key={oIdx} className={`text-xs font-medium ${q.correctAnswer === oIdx ? 'text-emerald-600 font-bold' : 'text-slate-400'}`}>
-                                        {String.fromCharCode(65 + oIdx)}. {opt}
+                                      <div key={oIdx} className="relative">
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Lựa chọn {String.fromCharCode(65 + oIdx)}</label>
+                                        <div className="flex items-center gap-2">
+                                          <input 
+                                            type="radio"
+                                            name={`correct-${q.id}`}
+                                            checked={q.correctAnswer === oIdx}
+                                            onChange={() => updateQuestion(q.id, { correctAnswer: oIdx })}
+                                            className="w-4 h-4 text-blue-600"
+                                          />
+                                          <input 
+                                            className="flex-1 p-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none text-sm font-bold"
+                                            defaultValue={opt}
+                                            onBlur={(e) => {
+                                              const newOptions = [...q.options];
+                                              newOptions[oIdx] = e.target.value;
+                                              updateQuestion(q.id, { options: newOptions });
+                                            }}
+                                          />
+                                        </div>
                                       </div>
                                     ))}
                                   </div>
+                                  <div className="flex justify-end gap-2 pt-2">
+                                    <button 
+                                      onClick={() => setEditingQuestionId(null)}
+                                      className="px-4 py-2 bg-slate-200 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-300 transition-colors"
+                                    >
+                                      Xong
+                                    </button>
+                                  </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
-                                  <button 
-                                    onClick={() => setEditingQuestionId(q.id)}
-                                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                                    title="Chỉnh sửa"
-                                  >
-                                    <Settings size={18} />
-                                  </button>
-                                  <button 
-                                    onClick={() => deleteQuestion(q.id)}
-                                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
-                                    title="Xóa"
-                                  >
-                                    <RotateCcw size={18} className="rotate-45" />
-                                  </button>
+                              ) : (
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="text-xs font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Câu {qIdx + 1}</span>
+                                      <h4 className="font-bold text-slate-800">{q.text}</h4>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                      {q.options.map((opt, oIdx) => (
+                                        <div key={oIdx} className={`text-xs font-medium ${q.correctAnswer === oIdx ? 'text-emerald-600 font-bold' : 'text-slate-400'}`}>
+                                          {String.fromCharCode(65 + oIdx)}. {opt}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col gap-2">
+                                    <button 
+                                      onClick={() => setEditingQuestionId(q.id)}
+                                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                                      title="Chỉnh sửa"
+                                    >
+                                      <Settings size={18} />
+                                    </button>
+                                    <button 
+                                      onClick={() => deleteQuestion(q.id)}
+                                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                                      title="Xóa"
+                                    >
+                                      <RotateCcw size={18} className="rotate-45" />
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-12 text-center border-2 border-dashed border-slate-100 rounded-3xl">
+                          <p className="text-slate-400 font-medium">Chưa có câu hỏi nào. Hãy tải file lên hoặc nhấn nút "Thêm câu hỏi" để bắt đầu.</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
