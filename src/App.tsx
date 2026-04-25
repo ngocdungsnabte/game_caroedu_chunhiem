@@ -828,6 +828,13 @@ export default function App() {
                             isWinningCell ? 'ring-8 ring-yellow-400 ring-offset-4 z-10 scale-105' : ''
                           }`}
                         >
+                          {/* Sequential Number */}
+                          {!cell && (
+                            <span className="absolute top-2 left-2 text-base md:text-xl font-black pointer-events-none transition-opacity opacity-40 text-slate-400">
+                              {i + 1}
+                            </span>
+                          )}
+
                           {cell && (
                             <div className="absolute inset-0 bg-white/20 pointer-events-none" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 30%, 0 70%)' }} />
                           )}
